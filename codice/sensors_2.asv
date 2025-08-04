@@ -1,0 +1,110 @@
+
+%% Base stations position (for the pos/vel correction measurements)
+
+% In NED coordinates
+% P_base1_ned = [0; 0; 0];        % North [m], East [m], Down [m]
+% P_base2_ned = [1000; 0; 0];
+% P_base3_ned = [1000; 1000; 0];
+% P_base4_ned = [0; 1000; 0];
+P_base1_ned = [0; 0; 0];        % North [m], East [m], Down [m]
+P_base2_ned = [2000; 0; 0];
+P_base3_ned = [3000; 2000; 0];
+P_base4_ned = [150; 2800; 0];
+P_base5_ned = [0; 0; 1000];        
+P_base6_ned = [0; 1000; 1500];
+P_base7_ned = [2000; 1500; 1000];
+P_base8_ned = [-50; 1700; 800];
+
+P_bases_ned = [P_base1_ned';
+                P_base2_ned';
+                P_base3_ned';
+                P_base4_ned';
+                P_base5_ned';
+                P_base6_ned';
+                P_base7_ned';
+                P_base8_ned'];
+N_bases = size(P_bases_ned, 1);
+
+%% Sensor frequences and standard deviation
+
+% Accelerometer
+std_dev_accx = 0.01;  % [m/s^2] 
+std_dev_accy = 0.01;  % [m/s^2]
+std_dev_accz = 0.01;  % [m/s^2]
+freq_acc = 50;  % [Hz]
+
+% gyro
+% bias_gyro = [0.02 0.01 0.007];  % [m/s^2]
+bias_gyro = [0.2 0.1 0.0];  % [m/s^2]
+% 
+std_dev_gyro1 = 3*1e-6; % [rad/s]   
+std_dev_gyro2 = 3*1e-6; % [rad/s]
+std_dev_gyro3 = 3*1e-6; % [rad/s]
+freq_gyro = 10;  % [Hz]
+
+% % Baro
+% std_dev_bar = 0.1;  % [m]
+% freq_bar = 5;  % [Hz]
+
+% UWB
+std_dev_UWB1 = 1e-6;  % [°]
+std_dev_UWB2 = 1e-6;  % [°]
+std_dev_UWB3 = 1e-6;  % [°]
+freq_UWB = freq_gyro;  % [Hz] 
+
+% Magnetometer
+std_dev_magx = 0.03;  % [rad]
+std_dev_magy = 0.03;  % [rad]  
+std_dev_magz = 0.03;  % [rad]  
+
+freq_mag = 50;  % [Hz]
+
+
+% KF sample time: Tf = 1/max(f_sens)
+Tf = ST;  % [s]
+
+
+%% Covariances matrices of process and measure noises
+
+q_pos_1 = 1e-10;    % Position
+q_pos_2 = 1e-10; 
+q_pos_3 = 1e-10;
+q_vel_1 = 1e-3;     % Velocity
+q_vel_2 = 1e-3;
+q_vel_3 = 1e-3;
+q_acc_1 = 1e-5;         % Acceleration
+q_acc_2 = 1e-5;
+q_acc_3 = 1e-5;
+q_quat_1 = 1e-12;       % Quaternions
+q_quat_2 = 1e-12;
+q_quat_3 = 1e-12;
+q_quat_4 = 1e-12;
+q_omega_1 = 3*1e-9;        % Angular rate
+q_omega_2 = 3*1e-9;
+q_omega_3 = 3*1e-9;
+q_bias_1 = 10^(-10);        % Gyro Byass
+q_bias_2 = 10^(-10);  
+q_bias_3 = 10^(-14);
+
+q_roll = 1e-3;
+q_pitch = 1e-3;
+q_yaw = 1e-3;
+
+% covariance matrix
+
+Q = 100*diag([q_pos_1, q_pos_2, q_pos_3, q_vel_1, q_vel_2, q_vel_3, q_acc_1,q_acc_2,q_acc_3, q_quat_1, q_quat_2, q_quat_3, q_quat_4, q_omega_1, q_omega_2, q_omega_3, q_bias_1, q_bias_2, q_bias_3]);
+Q_att = 100*diag([q_roll, q_pitch, q_yaw, q_omega_1, q_omega_2, q_omega_3, q_bias_1, q_bias_2, q_bias_3]);
+
+
+% measure covariance
+UWB_cov = [std_dev_UWB1^2 std_dev_UWB2^2 std_dev_UWB3^2];
+
+% BARO_cov = std_dev_bar^2;
+
+ACC_cov = [std_dev_accx^2 std_dev_accy^2 std_dev_accz^2];
+
+MAG_cov = [std_dev_magx^2, std_dev_magy^2, std_dev_magz^2];
+
+GYRO_cov = [std_dev_gyro1^2 std_dev_gyro2^2 std_dev_gyro3^2];
+
+sensor_covariances = [UWB_cov, ACC_cov, MAG_cov, GYRO_cov];
